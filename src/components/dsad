@@ -1,0 +1,16 @@
+          <div className="grid gap-4">
+            <div className="flex items-center gap-4">
+              <h1 className="font-semibold text-lg">Lista faktur</h1>
+              <button className="inline-flex bg-blue-300 hover:bg-blue-100 items-center dark:text-black justify-center text-sm font-medium py-2  rounded-md px-3 ml-auto">
+                Dodaj fakture
+              </button>
+            </div>
+            <div className="rounded-lg bg-white dark:bg-[#242526] dark:text-white shadow-sm">
+              <div className="p-2">
+                <div className="relative w-full overflow-auto">
+                  <hr />
+                </div>
+                <div>dsad</div>
+              </div>
+            </div>
+          </div>
