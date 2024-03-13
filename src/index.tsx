@@ -46,6 +46,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+  {
+    path: "/resendemail",
+    element: <h1>Wysłano ponownie</h1>,
+  },
 ]);
 
 const root = ReactDOM.createRoot(

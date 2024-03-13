@@ -1,38 +1,67 @@
 import ThemeSwitch from "../components/ThemeSwitch";
 import Alert from "../components/Alert";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { EyeIcon } from "../components/Icons";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "../axios/axios";
-const LOGIN_URL = "/auth/login";
+//API URL
+const REGISTER_URL = "/auth/register";
+
 function RegisterPage() {
   window.document.title = "Fakturnik - Rejestracja";
 
   const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const [rPassword, setRPassword] = useState("");
   const [loading, setLoading] = useState<boolean>(false);
   const [pwdV, setPwdV] = useState(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [remember, setRemember] = useState(false);
+  const [alertType, setAlertType] = useState<"error" | "success">("error");
 
+  //Email Validation - checking if email is in correct format
   function validateEmail(email: string) {
     var re = /\S+@\S+\.\S+/;
     return re.test(email);
   }
+  //Password Validation - checking if password is at least 12 characters long and contains at least 1 special character
   function validatePassword(password: string) {
-    if (password.length < 8) return false;
+    if (password.length < 12) return false;
+    const specialChars = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    if (!specialChars.test(password)) return false;
     return true;
   }
+  //Password checker - checking if password and repeated password are the same
+  function passwordChecker(password: string, rPassword: string) {
+    return password === rPassword;
+  }
+  //Name and firstname validation - checking if name and firstname are not empty
+  function validateName(name: string) {
+    return name !== "";
+  }
+
   function toggleAlert() {
     setAlert(!alert);
   }
 
-  function handleLogin(event: React.FormEvent<HTMLFormElement>) {
+  function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    setAlertType("error");
     if (!validateEmail(email)) {
       setAlertMessage("Wprowadź poprawny adres email!");
+      setAlert(true);
+      return;
+    }
+    if (!validateName(firstName)) {
+      setAlertMessage("Wprowadź swoje imię!");
+      setAlert(true);
+      return;
+    }
+    if (!validateName(lastName)) {
+      setAlertMessage("Wprowadź swoje nazwisko!");
       setAlert(true);
       return;
     }
@@ -41,18 +70,34 @@ function RegisterPage() {
       setAlert(true);
       return;
     }
-    Login();
+    if (!passwordChecker(password, rPassword)) {
+      setAlertMessage("Hasła nie są takie same!");
+      setAlert(true);
+      return;
+    }
+    Register();
   }
-  async function Login() {
+  async function Register() {
     setLoading(true);
     try {
-      const response = await axios.post(LOGIN_URL, {
+      const response = await axios.post(REGISTER_URL, {
         email: email,
         password: password,
-        remember: remember,
+        firstname: firstName,
+        lastname: lastName,
       });
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
+      if (response.status === 201) {
+        setAlertMessage(
+          "Rejestracja zakończona pomyślnie! Sprawdź swoją skrzynkę mailową w celu aktywacji konta."
+        );
+        setAlertType("success");
+        setAlert(true);
+        setEmail("");
+        setFirstName("");
+        setLastName("");
+        setPassword("");
+        setRPassword("");
+        setLoading(false);
       } else {
         setAlertMessage("Wystąpił błąd podczas logowania!");
         setAlert(true);
@@ -82,7 +127,7 @@ function RegisterPage() {
       </div>
       <div className="rounded-lg border bg-white dark:bg-[#242526] dark:border-zinc-900 mx-auto max-w-md">
         <h3 className="text-2xl font-bold p-6">Rejestracja</h3>
-        <form className="px-6 space-y-2" onSubmit={handleLogin}>
+        <form className="px-6" onSubmit={handleRegister}>
           <div className="space-y-1">
             <label className="text-sm font-medium leading-none" htmlFor="email">
               Email<span className="text-red-500">*</span>
@@ -92,22 +137,31 @@ function RegisterPage() {
               className="flex h-10 text-black w-full rounded-md border border-black bg-background px-3 py-2 text-sm  placeholder:text-muted-foreground"
               id="email"
               placeholder="Email"
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Podaj poprawny adres email
+            </p>
           </div>
           <div className="space-y-1">
             <label
               className="text-sm font-medium leading-none"
               htmlFor="firstname"
             >
-              Imie<span className="text-red-500">*</span>
+              Imię<span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               className="flex h-10 text-black w-full rounded-md border border-black bg-background px-3 py-2 text-sm  placeholder:text-muted-foreground"
               id="firstname"
-              placeholder="Imie"
+              placeholder="Imię"
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
             />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Podaj swoje imię
+            </p>
           </div>
           <div className="space-y-1">
             <label
@@ -121,9 +175,14 @@ function RegisterPage() {
               className="flex h-10 text-black w-full rounded-md border border-black bg-background px-3 py-2 text-sm  placeholder:text-muted-foreground"
               id="lastname"
               placeholder="Nazwisko"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
             />
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Podaj swoje nazwisko
+            </p>
           </div>
-          <div className="mt-3 space-y-2 relative">
+          <div className="mt-3 space-y-2">
             <div className="flex items-center">
               <label
                 className="text-sm font-medium leading-none"
@@ -136,21 +195,16 @@ function RegisterPage() {
               {...(pwdV ? { type: "text" } : { type: "password" })}
               className="flex h-10 text-black w-full rounded-md border border-black px-3 py-2 text-sm placeholder:text-muted-foreground"
               id="password"
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Hasło"
             />
-            <button
-              type="button"
-              onClick={(e) => setPwdV(!pwdV)}
-              className={
-                "text-black inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium absolute bottom-1 right-1 h-8 w-8 hover:text-blue-300 " +
-                (pwdV ? "text-blue-300" : "")
-              }
-            >
-              <EyeIcon className="w-4 h-4" />
-            </button>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Podaj hasło składające się z min. 12 znaków oraz zawierające min.
+              1 znak specjalny
+            </p>
           </div>
-          <div className="mt-3 space-y-2 relative">
+          <div className="mt-2">
             <div className="flex items-center">
               <label
                 className="text-sm font-medium leading-none"
@@ -161,38 +215,49 @@ function RegisterPage() {
             </div>
             <input
               {...(pwdV ? { type: "text" } : { type: "password" })}
-              className="flex h-10 text-black w-full rounded-md border border-black px-3 py-2 text-sm placeholder:text-muted-foreground"
+              className="flex h-10 text-black w-full mt-2 rounded-md border border-black px-3 py-2 text-sm placeholder:text-muted-foreground"
               id="password"
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Hasło"
+              value={rPassword}
+              onChange={(e) => setRPassword(e.target.value)}
+              placeholder="Powtórz hasło"
             />
-            <button
-              type="button"
-              onClick={(e) => setPwdV(!pwdV)}
-              className={
-                "text-black inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium absolute bottom-1 right-1 h-8 w-8 hover:text-blue-300 " +
-                (pwdV ? "text-blue-300" : "")
-              }
-            >
-              <EyeIcon className="w-4 h-4" />
-            </button>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Powtórz hasło
+              </p>
+              <button
+                type="button"
+                onClick={(e) => setPwdV(!pwdV)}
+                className={
+                  "text-black dark:text-white text-sm h-8 font-medium hover:text-blue-300 transition-colors duration-500 ease-in-out " +
+                  (pwdV ? "text-blue-300" : "")
+                }
+              >
+                {pwdV ? "Ukryj hasła" : "Pokaż hasła"}
+              </button>
+            </div>
           </div>
           {alert ? (
-            <Alert message={alertMessage} type="danger" toggle={toggleAlert} />
+            <Alert
+              message={alertMessage}
+              type={alertType}
+              toggle={toggleAlert}
+            />
           ) : null}
-
-          <button
-            className={
-              "rounded-md block text-sm font-medium h-10 px-4 w-full dark:text-black bg-black hover:bg-blue-300 text-white " +
-              (loading
-                ? "bg-blue-300 dark:bg-blue-300"
-                : "dark:bg-white dark:hover:bg-blue-300")
-            }
-            type="submit"
-            {...(loading ? { disabled: true } : "")}
-          >
-            {loading ? <LoadingSpinner /> : "Zarejestruj się"}
-          </button>
+          <div className="mt-3">
+            <button
+              className={
+                "rounded-md block text-sm font-medium mt-2 h-10 px-4 w-full dark:text-black bg-black hover:bg-blue-300 text-white " +
+                (loading
+                  ? "bg-blue-300 dark:bg-blue-300"
+                  : "dark:bg-white dark:hover:bg-blue-300")
+              }
+              type="submit"
+              {...(loading ? { disabled: true } : "")}
+            >
+              {loading ? <LoadingSpinner /> : "Zarejestruj się"}
+            </button>
+          </div>
           <div className="text-center text-base py-4">
             Masz konto?
             <Link to="/login" className="underline ml-1 hover:text-blue-300">
