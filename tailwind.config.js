@@ -2,7 +2,11 @@
 module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
-    extend: {},
+    extend: {
+      height: {
+        panel: "calc(100vh - 6rem)",
+      },
+    },
   },
   darkMode: "class",
   plugins: [],

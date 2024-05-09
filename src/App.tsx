@@ -67,17 +67,6 @@ function App() {
                   0
                 </div>
               </NavLink>
-              <NavLink
-                className={({ isActive }) => {
-                  return isActive
-                    ? "flex items-center gap-2 px-3 py-2 transition-all ease-in-out duration-300 bg-zinc-100 dark:bg-[#18191A] font-semibold rounded-md"
-                    : "flex items-center gap-2 px-3 py-2 transition-all ease-in-out duration-300 text-gray-500 dark:text-gray-400 dark:hover:text-white hover:text-black";
-                }}
-                to="/settings"
-              >
-                <SettingsIcon className="w-5 h-5" />
-                Ustawienia
-              </NavLink>
             </div>
           </nav>
           <div className="flex items-center justify-center p-2">

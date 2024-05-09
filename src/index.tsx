@@ -7,9 +7,9 @@ import NotFound from "./pages/NotFound";
 import Home from "./components/Home";
 import Invoices from "./components/Invoices";
 import Notifications from "./components/Notifications";
-import Settings from "./components/Settings";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -27,10 +27,6 @@ const router = createBrowserRouter([
         path: "/notifications",
         element: <Notifications />,
       },
-      {
-        path: "/settings",
-        element: <Settings />,
-      },
     ],
     errorElement: <NotFound />,
   },
@@ -41,14 +37,6 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginPage />,
-  },
-  {
-    path: "/register",
-    element: <RegisterPage />,
-  },
-  {
-    path: "/resendemail",
-    element: <h1>Wysłano ponownie</h1>,
   },
 ]);
 

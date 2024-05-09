@@ -4,6 +4,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "../axios/axios";
+import CodeForm from "../components/CodeForm";
 //API URL
 const REGISTER_URL = "/auth/register";
 
@@ -19,8 +20,7 @@ function RegisterPage() {
   const [pwdV, setPwdV] = useState(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [alertMessage, setAlertMessage] = useState("");
-  const [remember, setRemember] = useState(false);
-  const [alertType, setAlertType] = useState<"error" | "success">("error");
+  const [codeForm, setCodeForm] = useState(false);
 
   //Email Validation - checking if email is in correct format
   function validateEmail(email: string) {
@@ -49,7 +49,6 @@ function RegisterPage() {
 
   function handleRegister(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setAlertType("error");
     if (!validateEmail(email)) {
       setAlertMessage("Wprowadź poprawny adres email!");
       setAlert(true);
@@ -87,16 +86,7 @@ function RegisterPage() {
         lastname: lastName,
       });
       if (response.status === 201) {
-        setAlertMessage(
-          "Rejestracja zakończona pomyślnie! Sprawdź swoją skrzynkę mailową w celu aktywacji konta."
-        );
-        setAlertType("success");
-        setAlert(true);
-        setEmail("");
-        setFirstName("");
-        setLastName("");
-        setPassword("");
-        setRPassword("");
+        setCodeForm(true);
         setLoading(false);
       } else {
         setAlertMessage("Wystąpił błąd podczas logowania!");
@@ -119,13 +109,15 @@ function RegisterPage() {
       }
     }
   }
-
+  if (codeForm) {
+    return <CodeForm />;
+  }
   return (
     <div className="bg-zinc-100 dark:bg-[#18191A] dark:text-white h-screen transition-all duration-500">
       <div className="p-8 flex justify-end">
         <ThemeSwitch />
       </div>
-      <div className="rounded-lg border bg-white dark:bg-[#242526] dark:border-zinc-900 mx-auto max-w-md">
+      <div className="rounded-lg border bg-white dark:bg-[#242526] dark:border-zinc-900 mx-auto max-w-md shadow-lg">
         <h3 className="text-2xl font-bold p-6">Rejestracja</h3>
         <form className="px-6" onSubmit={handleRegister}>
           <div className="space-y-1">
@@ -237,13 +229,7 @@ function RegisterPage() {
               </button>
             </div>
           </div>
-          {alert ? (
-            <Alert
-              message={alertMessage}
-              type={alertType}
-              toggle={toggleAlert}
-            />
-          ) : null}
+          {alert ? <Alert message={alertMessage} toggle={toggleAlert} /> : null}
           <div className="mt-3">
             <button
               className={
